@@ -1,0 +1,1011 @@
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>От таблицы к сервису - дизайн Атвинты</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geologica:wght@300;400;500;700;800&display=swap">
+<style>
+/* Вертикальная лента экранов-листов: каждый экран - один тезис; тёмный винный фон из КП Атвинты,
+   светлые «бумажные» карточки для схем и скриншотов, лаймовый акцент - только для главных цифр. */
+:root{
+  color-scheme: dark;
+  --bg:#110910; --bg-2:#1b0c19; --surface:#24101f; --wine:#74263b; --wine-bright:#a43a50;
+  --text:#fff8f4; --muted:#d6c5cf; --muted-2:#aa929f; --line:rgba(255,255,255,.16);
+  --lime:#d9ff57; --ice:#c6dbff; --coral:#ff8c55;
+  --paper:#ffffff; --ink:#180914; --ink-muted:rgba(24,9,20,.66);
+  --font: "Geologica", "Segoe UI", Arial, sans-serif;
+  --r: 22px;
+}
+*{box-sizing:border-box}
+html{scroll-snap-type:y mandatory;scroll-behavior:smooth;background:var(--bg)}
+@media (max-width:820px),(max-height:900px){html{scroll-snap-type:y proximity}}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+body{margin:0;background:var(--bg);color:var(--text);font-family:var(--font);font-size:clamp(15px,1.15vw,19px);line-height:1.5;-webkit-font-smoothing:antialiased}
+body::before{content:"";position:fixed;inset:0;z-index:-1;background:linear-gradient(126deg,#100910 4%,#230d1e 52%,#5e2133)}
+h1,h2,h3,p{margin:0}
+img{max-width:100%;display:block}
+a{color:inherit}
+:focus-visible{outline:3px solid var(--lime);outline-offset:3px}
+
+.slide{min-height:100vh;min-height:100dvh;scroll-snap-align:start;display:flex;flex-direction:column;justify-content:center;gap:clamp(12px,1.8dvh,26px);padding-block:clamp(24px,4.5dvh,60px);padding-inline:max(16px,5.5vw);position:relative}
+.slide>*{min-width:0}
+.eyebrow{display:flex;align-items:center;gap:12px;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--muted-2)}
+.eyebrow b{color:var(--lime);font-weight:800}
+h2{font-size:clamp(30px,min(3.6vw,6dvh),60px);line-height:1.04;font-weight:500;text-wrap:balance;max-width:22ch}
+.lead{max-width:62ch;color:var(--muted);font-size:clamp(16px,1.3vw,21px)}
+.grid{display:grid;gap:clamp(14px,1.6vw,24px)}
+.two{grid-template-columns:minmax(0,1fr) minmax(0,1.15fr);align-items:center}
+@media (max-width:900px){.two{grid-template-columns:1fr}}
+
+/* обложка */
+.cover h1{font-size:clamp(40px,6.4vw,104px);line-height:.98;font-weight:500;max-width:14ch;text-wrap:balance}
+.cover h1 em{font-style:normal;color:var(--lime)}
+.cover .steps{display:flex;flex-wrap:wrap;gap:12px;margin-top:8px}
+.pill{display:inline-flex;align-items:center;gap:10px;padding:10px 16px;border:1px solid var(--line);border-radius:999px;background:rgba(255,255,255,.05);font-weight:500}
+.pill i{font-style:normal;font-size:12px;font-weight:800;color:var(--bg);background:var(--lime);border-radius:999px;padding:2px 9px}
+.logo{height:34px;width:auto;align-self:flex-start;opacity:.95}
+.hint{color:var(--muted-2);font-size:13px}
+
+/* разделитель шага */
+.divider{justify-content:flex-end}
+.divider .big{font-size:clamp(90px,16vw,260px);line-height:.85;font-weight:800;color:transparent;-webkit-text-stroke:2px var(--lime)}
+.divider h2{max-width:18ch}
+
+/* карточки */
+.card{background:rgba(255,255,255,.06);border:1px solid var(--line);border-radius:var(--r);padding:clamp(16px,1.6vw,26px);display:flex;flex-direction:column;gap:8px}
+.card h3{font-size:clamp(16px,1.25vw,21px);font-weight:700}
+.card p,.card li{color:var(--muted);font-size:clamp(14px,1.02vw,17px)}
+.card ul{margin:0;padding-left:18px;display:grid;gap:6px}
+.cards-3{grid-template-columns:repeat(3,minmax(0,1fr))}
+.cards-2{grid-template-columns:repeat(2,minmax(0,1fr))}
+@media (max-width:900px){.cards-3,.cards-2{grid-template-columns:1fr}}
+.card .k{font-size:12px;font-weight:800;color:var(--lime);letter-spacing:.06em;text-transform:uppercase}
+.limit-rows{display:grid;gap:clamp(10px,1.3dvh,16px);width:100%;max-width:1180px}
+.limit-head{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:clamp(10px,1.2vw,18px);color:#d9d9d9;font-size:13px;font-weight:800;letter-spacing:.06em;text-transform:uppercase}
+.limit-row{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:clamp(10px,1.2vw,18px)}
+.limit-card{display:flex;flex-direction:column;justify-content:center;min-height:clamp(94px,14dvh,136px);padding:clamp(15px,1.6vw,24px);border:2px solid #d9d9d9;border-radius:18px;background:#fff;color:#222}
+.limit-card.positive{border-left:6px solid #f0ff40}
+.limit-card.negative{border-left:6px solid #ff2159}
+.limit-card p{font-size:clamp(16px,1.35vw,21px);font-weight:500;line-height:1.24}
+@media (max-width:700px){.limit-head{display:none}.limit-row{grid-template-columns:1fr}.limit-card{min-height:0}.limit-card::before{content:'+';font-size:20px;font-weight:700;line-height:1;color:#777}.limit-card.negative::before{content:'−'}}
+.card.was{background:rgba(255,255,255,.03)}
+.card.now{background:rgba(217,255,87,.07);border-color:rgba(217,255,87,.35)}
+.work-map{display:grid;grid-template-columns:minmax(220px,.75fr) minmax(72px,.2fr) minmax(340px,1fr);gap:clamp(14px,2vw,30px);align-items:center;max-width:1180px;width:100%;margin-inline:auto}
+.work-sources{display:grid;gap:10px}
+.work-source{border:1px solid var(--line);border-radius:14px;background:rgba(255,255,255,.05);padding:13px 18px;font-size:clamp(15px,1.2vw,19px)}
+.work-arrow{display:flex;align-items:center;justify-content:center;color:var(--lime);font-size:clamp(54px,6vw,96px);line-height:1}
+.work-window{border:2px solid var(--lime);border-radius:var(--r);padding:clamp(20px,3vw,42px);background:rgba(217,255,87,.08);display:grid;gap:22px}
+.work-window strong{font-size:clamp(28px,2.8vw,48px);line-height:1.05;font-weight:500}
+.work-window span{color:var(--muted);font-size:clamp(15px,1.2vw,19px)}
+.work-window-tags{display:flex;flex-wrap:wrap;gap:9px}
+.work-window-tags i{font-style:normal;border:1px solid var(--line);border-radius:999px;padding:7px 12px;font-size:clamp(12px,.9vw,15px)}
+@media (max-width:800px){.work-map{grid-template-columns:1fr}.work-arrow{transform:rotate(90deg);font-size:55px}.work-sources{grid-template-columns:repeat(2,minmax(0,1fr))}.work-source:last-child{grid-column:1/-1}}
+
+/* гипотеза - таймлайн */
+.timeline{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;position:relative}
+.timeline .t{border-top:2px solid var(--line);padding-top:16px;display:grid;gap:6px}
+.timeline .t span{font-size:13px;font-weight:800;color:var(--muted-2)}
+.timeline .t strong{font-size:clamp(17px,1.5vw,24px);font-weight:500}
+.timeline .t.on{border-top-color:var(--lime)}
+.timeline .t.on span{color:var(--lime)}
+@media (max-width:700px){.timeline{grid-template-columns:1fr 1fr}}
+
+/* скриншоты */
+.shot{background:var(--paper);border-radius:16px;padding:6px;box-shadow:0 28px 70px rgba(7,2,7,.45);overflow:hidden}
+.shot img{border-radius:11px;width:100%;height:auto}
+.shot video{display:block;border-radius:11px;width:100%;height:auto;cursor:pointer}
+.shots{display:grid;gap:14px;grid-template-columns:repeat(2,minmax(0,1fr));align-items:start}
+.shots.three{grid-template-columns:1.1fr 1fr .8fr}
+@media (max-width:700px){.shots,.shots.three{grid-template-columns:1fr}}
+.cap{font-size:13px;color:var(--muted-2);margin-top:8px}
+.shot.tall img{max-height:62vh;width:auto;margin-inline:auto}
+.telegram-example{justify-self:center;width:min(100%,600px);display:grid;gap:8px}
+.telegram-example a{display:block;cursor:zoom-in}
+.telegram-example img{max-height:68vh;width:auto;max-width:100%;margin-inline:auto}
+.telegram-example .cap{text-align:center}
+.analysis-layout{display:grid;grid-template-columns:minmax(0,.85fr) minmax(0,1.15fr);gap:clamp(24px,4vw,64px);align-items:center}
+.analysis-copy{display:grid;gap:clamp(20px,3vh,36px);align-content:center}
+.analysis-copy .lead{max-width:46ch}
+.analysis-results{display:grid;gap:10px}
+.analysis-result{display:grid;grid-template-columns:3.6ch minmax(0,1fr);align-items:baseline;gap:12px;padding-top:10px;border-top:1px solid var(--line)}
+.analysis-result strong{color:var(--lime);font-size:clamp(32px,3.4vw,48px);font-weight:500;line-height:1;font-variant-numeric:tabular-nums}
+.analysis-result span{color:var(--muted);font-size:clamp(13px,1vw,17px)}
+.analysis-slider{min-width:0;display:grid;gap:12px}
+.analysis-frames{display:grid;height:min(62vh,590px)}
+.analysis-frames figure{grid-area:1 / 1;margin:0;min-width:0;min-height:0;display:flex;align-items:center;justify-content:center;visibility:hidden;opacity:0;transition:opacity .4s ease,visibility .4s ease}
+.analysis-frames figure.active{visibility:visible;opacity:1}
+.analysis-frames .shot{width:100%;height:100%;display:flex;align-items:center;justify-content:center}
+.analysis-frames img{max-width:100%;max-height:100%;width:auto;height:auto;object-fit:contain}
+.analysis-controls{display:flex;align-items:center;justify-content:center;gap:14px}
+.analysis-controls>button{width:34px;height:34px;border:1px solid var(--line);border-radius:50%;background:rgba(255,255,255,.06);color:var(--text);font:inherit;cursor:pointer}
+.analysis-dots{display:flex;align-items:center;gap:8px}
+.analysis-dots button{width:10px;height:10px;padding:0;border:0;border-radius:50%;background:rgba(255,255,255,.35);cursor:pointer}
+.analysis-dots button[aria-current="true"]{width:26px;border-radius:6px;background:var(--lime)}
+@media (max-width:900px){.analysis-layout{grid-template-columns:1fr}.analysis-frames{height:min(50vh,420px)}}
+@media (prefers-reduced-motion:reduce){.analysis-frames figure{transition:none}}
+
+/* список пунктов с иконкой-точкой */
+.points{display:grid;gap:14px;margin:0;padding:0;list-style:none}
+.points li{display:grid;grid-template-columns:28px minmax(0,1fr);gap:12px;align-items:start}
+.points li::before{content:"";width:12px;height:12px;margin-top:.45em;border-radius:50%;border:2px solid var(--lime)}
+.points b{display:block;font-weight:700}
+.points span{color:var(--muted);font-size:.95em}
+
+/* большие цифры */
+.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:clamp(12px,1.4vw,22px)}
+.results-stats{grid-template-columns:repeat(3,minmax(0,1fr));row-gap:clamp(24px,4vh,42px)}
+@media (max-width:900px){.stats{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.stat{border-top:1px solid var(--line);padding-top:14px;display:grid;gap:4px}
+.stat strong{font-size:clamp(40px,5vw,84px);line-height:1;font-weight:500;font-variant-numeric:tabular-nums}
+.stat.hi strong{color:var(--lime)}
+.stat span{color:var(--muted);font-size:clamp(14px,1vw,17px)}
+.stat small{color:var(--muted-2);font-size:13px}
+
+/* графики */
+.chart{background:rgba(255,255,255,.04);border:1px solid var(--line);border-radius:var(--r);padding:clamp(12px,1.4vw,22px)}
+.chart h3{font-size:15px;font-weight:700;margin-bottom:6px}
+.chart svg{width:100%;height:auto;display:block;overflow:visible}
+.legend{display:flex;flex-wrap:wrap;gap:16px;font-size:13px;color:var(--muted);margin-top:8px}
+.legend i{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:6px;vertical-align:-1px}
+
+/* карта процесса (идея из КП) */
+.process{background:var(--paper);color:var(--ink);border-radius:24px;padding:clamp(14px,1.6vw,24px);box-shadow:0 24px 70px rgba(7,2,7,.35);overflow-x:auto}
+.pmap{position:relative;display:grid;grid-template-columns:repeat(8,minmax(128px,1fr));grid-template-rows:auto auto auto auto;column-gap:12px;min-width:1120px}
+.axis{grid-row:2;grid-column:1 / -1;align-self:center;height:3px;margin-inline:20px;border-radius:9px;background:linear-gradient(90deg,#ff646b,#ff8c55 24%,#f5c443 40%,#84d8b3 58%,#66dcca 72%,#6dc8ff 86%,#a98bff)}
+.stage{display:contents}
+.br{display:flex;flex-direction:column;gap:5px;padding-left:12px;margin-left:16px;border-left:2px solid var(--tone)}
+.br.top{grid-row:1;justify-content:flex-end;padding-bottom:12px}
+.br.bot{grid-row:3;justify-content:flex-start;padding-top:12px}
+.node{grid-row:2;align-self:center;justify-self:start;position:relative;z-index:2;min-width:116px;padding:9px 12px;border:2px solid var(--tone);border-radius:12px;background:#fff;box-shadow:0 10px 24px rgba(24,9,20,.08)}
+.node span{display:block;font-size:10px;font-weight:800;color:var(--tone-d)}
+.node strong{display:block;font-size:14px;font-weight:800;line-height:1.15}
+.b{font-size:11.5px;line-height:1.28;font-weight:700;color:var(--tone-d);position:relative}
+.b::before{content:"";position:absolute;left:-14px;top:.6em;width:10px;height:2px;background:var(--tone)}
+.b small{display:block;font-weight:500;color:var(--ink-muted);font-size:10.5px}
+.b.new{border:1.5px dashed rgba(24,9,20,.3);border-radius:8px;padding:5px 7px;background:rgba(24,9,20,.035)}
+.b.new::before{left:-15px}
+.s1{--tone:#ff646b;--tone-d:#963135}.s2{--tone:#ff8c55;--tone-d:#8e4b25}.s3{--tone:#e9b62c;--tone-d:#7a5b07}.s4{--tone:#84d8b3;--tone-d:#2f6756}
+.s5{--tone:#66dcca;--tone-d:#267166}.s6{--tone:#6dc8ff;--tone-d:#246f99}.s7{--tone:#4aa3ff;--tone-d:#1d5c9c}.s8{--tone:#a98bff;--tone-d:#5a3fb0}
+.loop{grid-row:4;grid-column:4 / 8;margin-top:6px;border:2px dashed #4aa3ff;border-top:none;border-radius:0 0 18px 18px;height:26px;position:relative}
+.loop span{position:absolute;left:50%;bottom:-11px;transform:translateX(-50%);background:#fff;padding:0 10px;font-size:11.5px;font-weight:800;color:#1d5c9c;white-space:nowrap}
+.loop::before{content:"";position:absolute;left:-7px;top:-8px;border:6px solid transparent;border-bottom:9px solid #4aa3ff}
+.pkey{display:flex;flex-wrap:wrap;gap:18px;margin-top:22px;font-size:12px;color:var(--ink-muted)}
+.pkey .b{color:var(--ink)}
+.pkey .b::before{display:none}
+
+/* дорожная карта */
+.road{display:grid;grid-template-columns:repeat(13,minmax(0,1fr));gap:6px}
+.road div{border-radius:10px;padding:10px 8px;background:rgba(255,255,255,.05);border:1px solid var(--line);font-size:12px;line-height:1.25;color:var(--muted);display:grid;gap:4px;align-content:start;min-height:120px}
+.road div b{font-size:13px;color:var(--text)}
+.road .done{background:rgba(217,255,87,.12);border-color:rgba(217,255,87,.5)}
+.road .done b{color:var(--lime)}
+@media (max-width:1000px){.road{grid-template-columns:repeat(4,minmax(0,1fr))}}
+
+
+/* анкета */
+.quotes{display:grid;gap:12px}
+blockquote{margin:0;padding:12px 16px;border-radius:14px;background:rgba(255,255,255,.05);font-size:clamp(15px,1.15vw,19px);line-height:1.4}
+blockquote cite{display:block;margin-top:4px;font-style:normal;font-size:12px;color:var(--muted-2)}
+.donut{display:grid;grid-template-columns:minmax(0,200px) minmax(0,1fr);gap:20px;align-items:center;margin-block:6px}
+.dleg{list-style:none;margin:0;padding:0;display:grid;gap:8px;font-size:clamp(13px,1vw,16px)}
+.dleg li{display:grid;grid-template-columns:12px minmax(0,1fr) auto;gap:10px;align-items:center}
+.dleg i{width:12px;height:12px;border-radius:3px}
+.dleg b{font-variant-numeric:tabular-nums;font-weight:600}
+@media (max-width:520px){.donut{grid-template-columns:1fr;justify-items:center}.donut svg{max-width:200px}}
+/* экран в два шага: второй шаг проявляется прокруткой */
+.slide.stepped{display:block;padding:0;height:200vh;min-height:0}
+.stepped .stick{position:sticky;top:0;height:100vh;height:100dvh;display:flex;flex-direction:column;justify-content:center;gap:clamp(12px,1.8dvh,26px);padding-block:clamp(24px,4.5dvh,60px);padding-inline:max(16px,5.5vw)}
+.stepped .stick>*{min-width:0}
+.snap2{position:absolute;top:100vh;left:0;width:1px;height:1px;scroll-snap-align:start}
+.js .stepped .later{opacity:0;transform:translateY(18px);transition:opacity .6s ease,transform .6s ease}
+.js .stepped.on .later{opacity:1;transform:none}
+@media (prefers-reduced-motion:reduce){.js .stepped .later{transition:none;transform:none}}
+@media (max-width:820px){.slide.stepped{height:auto}.stepped .stick{position:static;height:auto;min-height:100vh}.snap2{display:none}.js .stepped .later{opacity:1;transform:none}}
+.diff{display:grid;gap:8px;padding:16px 18px;border-radius:16px;background:rgba(217,255,87,.07);border:1px solid rgba(217,255,87,.3)}
+.diff h3{font-size:clamp(16px,1.2vw,20px);font-weight:700}
+.diff p{color:var(--muted);max-width:62ch}
+.diff p b{color:var(--text)}
+.diff p+p{padding-top:10px;border-top:1px solid var(--line)}
+.pains{grid-template-columns:minmax(0,2.3fr) minmax(0,1fr);align-items:center}
+.chart.main{padding:clamp(18px,2vw,32px)}
+.chart.main h3{font-size:clamp(16px,1.3vw,22px)}
+.donut.big{grid-template-columns:minmax(0,min(46vh,420px)) minmax(0,1fr);gap:clamp(20px,3vw,48px)}
+.donut.big .dleg{font-size:clamp(15px,1.35vw,22px);gap:clamp(8px,1.4vh,16px)}
+.donut.big .dleg i{width:16px;height:16px}
+.donut.big .dleg li{grid-template-columns:16px minmax(0,1fr) auto}
+.quotes.small blockquote{font-size:clamp(13px,.95vw,15px);padding:10px 14px}
+@media (max-width:900px){.pains{grid-template-columns:1fr}.donut.big{grid-template-columns:1fr;justify-items:center}.donut.big svg{max-width:260px}}
+.qslider{display:grid;gap:14px}
+.qtrack{display:grid}
+.qtrack blockquote{grid-area:1 / 1;opacity:0;transform:translateY(8px);transition:opacity .6s ease,transform .6s ease;pointer-events:none;font-size:clamp(17px,1.5vw,24px);line-height:1.35;padding:clamp(16px,1.6vw,24px)}
+.qtrack blockquote cite{font-size:13px;margin-top:10px}
+.qtrack blockquote.active{opacity:1;transform:none;pointer-events:auto}
+.qdots{display:flex;gap:8px}
+.qdots button{width:10px;height:10px;padding:0;border-radius:50%;border:0;background:rgba(255,255,255,.25);cursor:pointer}
+.qdots button[aria-current="true"]{background:var(--lime);width:26px;border-radius:6px}
+@media (prefers-reduced-motion:reduce){.qtrack blockquote{transition:none;transform:none}}
+/* схема процесса в цветах Атвинты: плитки 4×2, порядок слева направо */
+.pflow{--pink:#ff2159;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:clamp(12px,1.3vw,20px)}
+.ptile{position:relative;display:grid;align-content:start;gap:8px;padding:clamp(14px,1.3vw,20px);border-radius:18px;background:rgba(255,255,255,.05);border:1px solid var(--line)}
+.ptile:not(:nth-child(4n))::after{content:"→";position:absolute;right:calc(-1 * clamp(12px,1.3vw,20px) / 2);top:22px;transform:translateX(50%);color:var(--pink);font-weight:700;font-size:18px;line-height:1}
+.ptile .pn{font-size:clamp(26px,2.4vw,40px);line-height:1;font-weight:800;color:var(--pink)}
+.ptile h3{font-size:clamp(16px,1.3vw,21px);font-weight:700}
+.ptile ul{margin:0;padding:0;list-style:none;display:grid;gap:6px}
+.ptile li{font-size:clamp(13px,.95vw,15px);color:var(--muted);line-height:1.35;padding-left:14px;position:relative}
+.ptile li::before{content:"";position:absolute;left:0;top:.55em;width:6px;height:6px;border-radius:50%;background:var(--pink)}
+.ptile li.svc{color:var(--text)}
+.ptile li.svc::before{background:var(--lime)}
+.ptile em,.pnote em{font-style:normal;display:inline-block;margin-left:6px;padding:1px 7px;border-radius:999px;background:var(--lime);color:var(--bg);font-size:10.5px;font-weight:800;vertical-align:1px}
+.ptile.back{border-color:var(--pink);box-shadow:0 0 0 1px var(--pink) inset}
+.ploop{grid-column:1 / 4;display:flex;align-items:center;gap:12px;padding:10px 16px;border:1.5px dashed var(--pink);border-radius:999px;color:var(--text);font-size:clamp(13px,1vw,16px);font-weight:500}
+.ploop .arr{color:var(--pink);font-size:22px;line-height:1}
+.pnote{font-size:13px;color:var(--muted-2)}
+.pnote em{margin:0 4px 0 0}
+@media (max-width:1000px){.pflow{grid-template-columns:repeat(2,minmax(0,1fr))}.ptile::after{display:none}.ploop{grid-column:1 / -1;border-radius:16px}}
+@media (max-width:560px){.pflow{grid-template-columns:1fr}}
+/* пошаговый экран: шаг слева подсвечивается, справа меняется иллюстрация */
+.slide.stepped{height:calc(var(--n,2) * 100vh)}
+.handoff{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:clamp(16px,2vw,28px);max-width:1200px}
+.handoff article{display:grid;align-content:space-between;gap:clamp(24px,5vh,54px);min-height:260px;padding:clamp(22px,2.8vw,42px);border:1px solid var(--line);border-radius:var(--r);background:rgba(255,255,255,.05)}
+.handoff article:last-child{background:rgba(217,255,87,.07);border-color:rgba(217,255,87,.35)}
+.handoff .tag{color:var(--lime);font-size:13px;font-weight:800;letter-spacing:.06em;text-transform:uppercase}
+.handoff strong{display:block;font-size:clamp(24px,2.7vw,42px);font-weight:500;line-height:1.1}
+.handoff p{color:var(--muted);font-size:clamp(15px,1.1vw,18px);max-width:38ch}
+@media (max-width:760px){.handoff{grid-template-columns:1fr}.handoff article{min-height:0;gap:18px}}
+@media (max-height:800px){
+  .slide{gap:10px;padding-block:clamp(16px,3dvh,28px)}
+  .stepped .stick{gap:10px;padding-block:clamp(16px,3dvh,28px)}
+  h2{font-size:clamp(27px,min(3.1vw,5.5dvh),48px)}
+  .cover h1{font-size:clamp(42px,min(6vw,10dvh),86px)}
+  .lead{font-size:clamp(15px,min(1.2vw,2.5dvh),19px)}
+  .chart{padding:clamp(10px,1vw,16px)}
+  .chart svg{max-height:42dvh}
+  .analysis-frames{height:min(50dvh,440px)}
+  .telegram-example img{max-height:60dvh}
+  .shot.tall img{max-height:55dvh}
+  .stat strong{font-size:clamp(36px,min(5vw,8dvh),72px)}
+  .road div{min-height:0}
+}
+/* видео по клику: без автозапуска, по кругу, без звука */
+.vbox{position:relative;cursor:pointer}
+.vbox video{display:block;width:100%;height:auto;border-radius:11px;background:#fff}
+.vplay{position:absolute;inset:0;margin:auto;width:84px;height:84px;border-radius:50%;border:0;background:rgba(17,9,16,.78);color:var(--lime);font-size:30px;cursor:pointer;display:grid;place-items:center;box-shadow:0 10px 30px rgba(7,2,7,.4)}
+.vplay span{margin-left:5px}
+.vplay:hover{background:rgba(17,9,16,.92)}
+.vbox.playing .vplay{display:none}
+/* навигация */
+.nav{position:fixed;right:max(12px,env(safe-area-inset-right));bottom:calc(14px + env(safe-area-inset-bottom,0px));z-index:10;display:flex;align-items:center;gap:6px;background:rgba(17,9,16,.72);backdrop-filter:blur(8px);border:1px solid var(--line);border-radius:999px;padding:5px}
+.nav button{width:36px;height:36px;border-radius:50%;border:0;background:transparent;color:var(--text);font:inherit;font-size:18px;cursor:pointer}
+.nav button:hover{background:rgba(255,255,255,.1)}
+.nav output{font-size:13px;font-variant-numeric:tabular-nums;color:var(--muted);min-width:56px;text-align:center}
+
+/* Презентационная версия по дизайн-системе Атвинты, v1.1 */
+:root{color-scheme:light;--bg:#fff;--bg-2:#f4f4f4;--surface:#fff;--wine:#787878;--wine-bright:#a4a4a4;--text:#222;--muted:#646464;--muted-2:#787878;--line:#d9d9d9;--lime:#ff2159;--ice:#26c9b8;--coral:#a4a4a4;--paper:#fff;--ink:#222;--ink-muted:#646464;--r:24px}
+html,body{background:#fff}
+body::before{display:none}
+.slide{background:#fff;gap:clamp(10px,1.6dvh,22px);padding-block:clamp(22px,3.7dvh,48px);padding-inline:clamp(16px,5.4vw,120px)}
+.slide:nth-child(3n):not(.cover):not(.divider){background:#f4f4f4}
+.eyebrow{align-self:flex-start;border:2px solid #d9d9d9;border-radius:50px;padding:5px 13px;color:#646464;letter-spacing:.02em;text-transform:none;font-size:13px;font-weight:500}
+.eyebrow b{color:#ff2159;font-weight:700}
+h2{font-size:clamp(30px,min(3.45vw,5.8dvh),58px);line-height:1.08;letter-spacing:-.03em;font-weight:500;max-width:24ch}
+.lead{color:#424242;line-height:1.43}
+.cover{background:#222!important;color:#fff}
+.cover::after{content:"";position:absolute;right:-8vw;top:-22vh;width:min(49vw,760px);aspect-ratio:1;border-radius:50%;background:radial-gradient(circle at 35% 30%,#ff5876,#ff2159 43%,#a92343 72%);filter:drop-shadow(-30px 35px 50px rgba(0,0,0,.28));opacity:.92;z-index:0}
+.cover>*{position:relative;z-index:1}
+.cover h1{max-width:12ch;letter-spacing:-.045em}
+.cover h1 em{color:#ff2159}
+.cover .lead,.cover .hint{color:#d9d9d9}
+.cover .pill{border:2px solid #787878;background:rgba(255,255,255,.06);color:#fff}
+.cover .pill i{background:#ff2159;color:#fff}
+.divider{background:#222!important;color:#fff}
+.divider .big{-webkit-text-stroke:2px #ff2159}
+.divider .eyebrow{border-color:#787878;color:#d9d9d9}
+.divider .eyebrow b{color:#ff5876}
+.divider .lead{color:#d9d9d9}
+.card,.chart,.ptile,.handoff article,.work-source,.work-window{background:#fff;border:2px solid #d9d9d9;box-shadow:none}
+.card p,.card li,.points span,.stat span,.legend,.diff p,.pnote{color:#646464}
+.card .k,.handoff .tag{color:#ff2159}
+.card.now,.handoff article:last-child{background:#fff2f5;border-color:#ff2159}
+.shot{border:2px solid #d9d9d9;padding:4px;border-radius:24px;box-shadow:none;background:#fff}
+.shot img,.shot video{border-radius:18px}
+.analysis-result{border-color:#d9d9d9}
+.analysis-result strong,.stat.hi strong{color:#ff2159}
+.analysis-result span,.telegram-example .cap,.cap{color:#646464}
+.analysis-controls>button,.nav button{border:2px solid #d9d9d9;background:#fff;color:#222}
+.analysis-dots button,.qdots button{background:#a4a4a4}
+.analysis-dots button[aria-current="true"],.qdots button[aria-current="true"]{background:#ff2159}
+.points li::before{border-color:#ff2159}
+.stat{border-color:#d9d9d9}
+.stat strong{letter-spacing:-.045em}
+.chart{background:#fff}
+.chart h3{color:#222}
+.legend i{border-radius:50%;border:0}
+.legend i.point-key{width:12px;height:12px;border:0;border-radius:50%;background:#f0ff40;vertical-align:-1px}
+.dleg i{border:0}
+.process{box-shadow:none;border:2px solid #d9d9d9}
+.axis{background:linear-gradient(90deg,#ff2159,#ff5876,#a4a4a4)}
+.s1,.s2,.s3,.s4{--tone:#ff2159;--tone-d:#a92343}
+.s5,.s6,.s7,.s8{--tone:#787878;--tone-d:#424242}
+.loop{border-color:#ff2159}.loop::before{border-bottom-color:#ff2159}.loop span{color:#ff2159}
+.road div{background:#fff;border:2px solid #d9d9d9;color:#646464}
+.road div b{color:#222}
+.road .done{background:#fff2f5;border-color:#ff2159}.road .done b{color:#ff2159}
+blockquote,.diff{background:#fff;border:2px solid #d9d9d9;box-shadow:none}
+blockquote cite{color:#787878}.diff p b{color:#222}
+.ptile{background:#fff}.ptile .pn{color:#ff2159}.ptile li{color:#646464}.ptile li.svc{color:#222}.ptile li.svc::before{background:#ff2159}
+.ptile em,.pnote em{background:#ff2159;color:#fff}.ptile.back{border-color:#ff2159;box-shadow:none}
+.ploop{border-color:#ff2159;color:#222}.ploop .arr{color:#ff2159}
+.work-source{border-radius:24px;font-weight:500}
+.work-arrow{color:#ff2159}
+.work-window{border-color:#ff2159;background:#fff2f5}
+.work-window span{color:#646464}
+.work-window-tags i{background:#fff;border:2px solid #d9d9d9}
+.nav{background:rgba(255,255,255,.94);border:2px solid #d9d9d9;color:#222;box-shadow:none}
+.nav output{color:#646464}
+:focus-visible{outline-color:#ff2159}
+@media(max-height:800px){.slide{gap:8px;padding-block:clamp(16px,2.8dvh,26px)}.analysis-copy{gap:clamp(12px,2dvh,22px)}.analysis-results{gap:6px}.analysis-result{padding-top:6px}.analysis-result strong{font-size:clamp(30px,3vw,42px)}.analysis-frames{height:min(45dvh,400px)}.shot img{max-height:56dvh;object-fit:contain}}
+@media(max-width:900px){.slide{justify-content:flex-start}.cover,.divider{justify-content:center}.analysis-frames{height:min(42dvh,380px)}.work-sources{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media print{html{scroll-snap-type:none}.slide{height:100vh;min-height:100vh;break-after:page}.nav{display:none}}
+
+
+/* Слайд 9: текст и скриншоты сверху, показатели в отдельной строке */
+.slide[data-title="ИИ-фильтр"]{justify-content:center}
+.slide[data-title="ИИ-фильтр"] .analysis-layout{align-items:center}
+.slide[data-title="ИИ-фильтр"] .analysis-copy{gap:clamp(14px,2.2dvh,26px)}
+.slide[data-title="ИИ-фильтр"] .analysis-frames{height:min(48dvh,440px)}
+.slide[data-title="ИИ-фильтр"] .analysis-results-row{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:clamp(16px,2vw,30px);width:100%}
+.slide[data-title="ИИ-фильтр"] .analysis-results-row h3{grid-column:1/-1;font-size:13px;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.slide[data-title="ИИ-фильтр"] .analysis-results-row .analysis-result{display:grid;grid-template-columns:1fr;align-content:start;gap:2px;padding-top:10px;border-top:2px solid var(--line)}
+.slide[data-title="ИИ-фильтр"] .analysis-results-row strong{font-size:clamp(32px,min(3.4vw,6dvh),52px)}
+.slide[data-title="ИИ-фильтр"] .analysis-results-row span{font-size:clamp(13px,1vw,17px);line-height:1.3}
+@media(max-width:900px){.slide[data-title="ИИ-фильтр"] .analysis-layout{grid-template-columns:1fr 1fr;gap:18px}.slide[data-title="ИИ-фильтр"] .analysis-frames{height:min(40dvh,320px)}}
+@media(max-width:680px){.slide[data-title="ИИ-фильтр"] .analysis-layout{grid-template-columns:1fr}.slide[data-title="ИИ-фильтр"] .analysis-results-row{grid-template-columns:1fr 1fr}.slide[data-title="ИИ-фильтр"] .analysis-frames{height:min(32dvh,260px)}}
+
+
+.to-top{position:fixed;left:max(16px,env(safe-area-inset-left));bottom:calc(18px + env(safe-area-inset-bottom,0px));z-index:11;display:grid;place-items:center;width:44px;height:44px;padding:0;border:2px solid #ff2159;border-radius:50%;background:#ff2159;color:#fff;font:600 20px var(--font);cursor:pointer;box-shadow:0 8px 24px rgba(34,34,34,.16)}
+.to-top:hover{background:#222;border-color:#222}
+.to-top[hidden]{display:none}
+.to-top span{line-height:1}
+@media(max-width:560px){.to-top{left:16px;bottom:calc(14px + env(safe-area-inset-bottom,0px));width:42px;height:42px}}
+
+
+/* Слайд 2: диаграмма без карточки */
+.slide[data-title="Кто ответил"] .chart{border:0;background:transparent;border-radius:0;padding:0}
+.slide[data-title="Кто ответил"] .stat{border:0}
+.slide[data-title="Кто ответил"] .diff{border:0;background:#f4f4f4}
+/* Данные: четыре экрана на тёмном фоне */
+.slide.data-dark{background:#222!important;color:#fff}
+.data-dark .eyebrow{border-color:#646464;color:#d9d9d9}
+.data-dark .eyebrow b{color:#f0ff40}
+.data-dark .lead,.data-dark .legend{color:#d9d9d9}
+.data-dark .chart{background:#2b2b2b;border-color:#424242}
+.data-dark .chart h3{color:#fff}
+.data-dark svg text[fill="#222222"]{fill:#f4f4f4}
+.data-dark svg text[fill="#787878"]{fill:#bdbdbd}
+.data-dark svg line[stroke="#d9d9d9"]{stroke:#4a4a4a}
+/* Отступ между заголовком и содержанием на каждом экране */
+.slide h2{margin-bottom:clamp(14px,2.4dvh,28px)}
+.slide.cover h1{margin-bottom:clamp(14px,2.4dvh,28px)}
+.slide .chart h3{margin-bottom:clamp(12px,1.8dvh,20px)}
+@media(max-height:800px){.slide h2,.slide.cover h1{margin-bottom:12px}.slide .chart h3{margin-bottom:9px}}
+
+.slide[data-title="База документов"] .shot video{width:100%;max-height:66dvh;object-fit:contain}
+
+.slide[data-title="Парсинг"] .shot video{width:100%;max-height:66dvh;object-fit:contain}
+.slide[data-title="Новые тендеры"] .shot video{width:100%;max-height:66dvh;object-fit:contain}
+.slide[data-title="Карточка тендера"] .shot video{width:100%;max-height:66dvh;object-fit:contain}
+
+/* Последний слайд: QR-код практикума */
+.qr-final{background:#222!important;color:#fff}
+.qr-final .eyebrow{border-color:#787878;color:#d9d9d9}
+.qr-final .qr-layout{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);gap:clamp(30px,5vw,80px);align-items:center;width:100%;max-width:1200px;margin-inline:auto}
+.qr-final .qr-copy>.eyebrow{justify-self:start}
+.qr-final .qr-copy{display:grid;gap:clamp(20px,3dvh,36px)}
+.qr-final h2{font-size:clamp(36px,min(4.5vw,7dvh),72px);max-width:18ch;line-height:1.08}
+.qr-final h2 em{font-style:normal;color:#ff2159}
+.qr-final .lead{color:#d9d9d9;max-width:35ch}
+.qr-final .qr-panel{display:grid;justify-items:center;gap:20px}
+.qr-final .qr-code{display:block;padding:20px;background:#fff;border-radius:24px;width:fit-content;max-width:100%}
+.qr-final .qr-code img{width:min(49dvh,380px);height:auto;max-width:100%;aspect-ratio:1;image-rendering:pixelated}
+.qr-final .qr-url{font-size:clamp(15px,1.5vw,22px);font-weight:500;text-underline-offset:6px;overflow-wrap:anywhere}
+.qr-final .qr-url:hover{color:#ff5876}
+.qr-final .qr-caption{font-size:14px;color:#d9d9d9;text-align:center}
+@media(max-width:900px){.qr-final{justify-content:center}.qr-final .qr-layout{grid-template-columns:1fr;gap:30px}.qr-final h2{font-size:clamp(32px,6vw,52px)}.qr-final h2 br{display:none}.qr-final .qr-copy{gap:20px}.qr-final .qr-code img{width:min(38dvh,340px)}.qr-final .qr-panel{gap:15px}}
+</style>
+
+<main id="deck">
+
+<!-- 1 -->
+<section class="slide cover" data-title="Обложка">
+  <img class="logo" src="img/logo.png" alt="Атвинта">
+  <h1>От таблицы к <em>сервису</em></h1>
+  <p class="lead">Как мы автоматизировали тендеры в два шага: сначала собрали поток в Google-таблицу и Telegram, теперь переносим весь цикл в собственный Тендерный сервис</p>
+  <div class="steps">
+    <span class="pill"><i>Шаг 1</i>Google-таблица + Telegram</span>
+    <span class="pill"><i>Шаг 2</i>Тендерный сервис</span>
+  </div>
+  <p class="hint">Листайте вниз: колесо, стрелки ↓ ↑ или пробел</p>
+</section>
+
+<!-- анкета: кто ответил -->
+<section class="slide" data-title="Кто ответил">
+  <div class="eyebrow"><b>Вводное слово</b> · анкета «ИИ в тендерах»</div>
+  <h2>Чат и агент работают по-разному</h2>
+  <div class="grid two" style="align-items:center">
+    <div class="stats" style="grid-template-columns:1fr">
+      <div class="stat hi"><strong>53%</strong><span>уже пробуют ChatGPT, DeepSeek и другие ИИ-чаты</span></div>
+      <div class="stat"><strong>7%</strong><span>пробуют свое</span></div>
+      <div class="diff">
+        <h3>Как устроена работа</h3>
+        <p><b>ИИ-чат.</b> Вы находите тендер, загружаете документы и задаёте вопрос. Ответ в таблицу переносите сами</p>
+        <p><b>ИИ-агент.</b> Каждый день забирает новые тендеры, читает документы, сверяет их с заданными критериями, сохраняет результат и сообщает команде</p>
+      </div>
+    </div>
+    <div class="chart"><h3>Чем пользуются участники анкеты, %</h3><svg id="chTools" viewBox="0 0 560 300" role="img" aria-label="Инструменты по ответам 15 участников анкеты; можно выбрать несколько вариантов"></svg></div>
+  </div>
+</section>
+
+<!-- анкета: общие боли -->
+<section class="slide" data-title="Общие боли">
+  <div class="eyebrow"><b>Вводное слово</b> · общие боли</div>
+  <h2>Больше всего времени уходит в начале воронки</h2>
+  <div class="grid pains">
+    <div class="chart main"><div class="donut big"><svg id="chPains" viewBox="0 0 240 240" role="img" aria-label="Трудоёмкие этапы по ответам анкеты, круговая диаграмма"></svg><ul class="dleg" id="chPainsLeg"></ul></div></div>
+    <div class="qslider" id="qslider" aria-roledescription="слайдер цитат">
+      <div class="qtrack">
+      <blockquote class="active">«Хочу быстрее отбирать лоты и принимать решение об участии»<cite>руководитель тендерного направления</cite></blockquote>
+      <blockquote>«Быстрее обрабатывать документы и получать конкретные требования, чтобы ускорить фильтр отбора»<cite>тендерный специалист</cite></blockquote>
+      <blockquote>«Чтобы предложение не выглядело как нейрослоп, но и не отнимало недели»<cite>участник анкеты, event</cite></blockquote>
+      <blockquote>«ИИ вообще реально может заменить ручной поиск релевантных тендеров?»<cite>тендерный специалист</cite></blockquote>
+      </div>
+      <div class="qdots" role="group" aria-label="Выбор цитаты"></div>
+    </div>
+  </div>
+</section>
+
+<!-- 3 -->
+<section class="slide stepped" data-title="Вручную не масштабируется">
+  <div class="stick">
+  <div class="eyebrow"><b>Наш путь</b> · с чего всё началось</div>
+  <h2>Вручную это не масштабируется</h2>
+  <div class="stats" style="grid-template-columns:repeat(2,minmax(0,1fr));max-width:900px">
+    <div class="stat"><strong>1</strong><span>тендер в месяц: столько разбирали руками</span></div>
+    <div class="stat hi later"><strong>до 65</strong><span>тендеров в день приходит после автоматизации</span></div>
+  </div>
+  <div class="grid cards-2">
+    <div class="card was"><div class="k">Было</div><ul>
+      <li>Десятки площадок, смотрели только приглашения и пропускали интересное</li>
+      <li>Документацию читали вручную</li>
+      <li>Не было системы и понятного процесса</li>
+      <li>Каждый тендер разбирали долго</li></ul></div>
+    <div class="card now later"><div class="k">Стало</div><ul>
+      <li>Автоматическая выгрузка с крупного агрегатора, до 65 строк в день</li>
+      <li>ИИ-фильтр и анализ документации до передачи команде</li>
+      <li>Telegram-группы по направлениям, распределение задач</li>
+      <li>Зоны ответственности и учёт результатов</li></ul></div>
+  </div>
+  </div>
+  <div class="snap2" aria-hidden="true"></div>
+</section>
+
+<!-- 4 процесс -->
+<section class="slide" data-title="Тендерный процесс">
+  <div class="eyebrow"><b>Наш тендерный процесс</b> · от выгрузки до итога</div>
+  <h2>Тендер проходит 8 шагов</h2>
+  <div class="pflow">
+      <article class="ptile"><span class="pn">01</span><h3>Поиск</h3><ul><li>Выгрузка с агрегатора каждый день</li><li>ИИ-фильтр: наше / не уверен / не наше</li><li>Проверка дублей</li></ul></article>
+      <article class="ptile"><span class="pn">02</span><h3>Отбор</h3><ul><li>Отчёт ИИ: стек, требования, сроки, риски</li><li>Взять в работу или отказ с причиной</li><li>Направление и ответственный</li></ul></article>
+      <article class="ptile"><span class="pn">03</span><h3>Изучение</h3><ul><li>Документация, Checko, юрист</li><li>Задача «Изучить» на 24 часа</li><li>Решение: участвуем или нет</li></ul></article>
+      <article class="ptile back"><span class="pn">04</span><h3>Подготовка</h3><ul><li>Чек-лист документов</li><li>База документов, формы, КП</li><li>Оплата площадки</li></ul></article>
+      <article class="ptile"><span class="pn">05</span><h3>Подача</h3><ul><li>На площадке или на почту</li><li>Дата подачи - в статистику</li><li>Когда ждать ответ</li></ul></article>
+      <article class="ptile"><span class="pn">06</span><h3>Отслеживание</h3><ul><li>Результаты и протоколы</li><li>Письма площадок сами находят тендер</li><li>Допущены к следующему этапу</li></ul></article>
+      <article class="ptile"><span class="pn">07</span><h3>Следующий этап</h3><ul><li>Переторжка</li><li>Основной этап, этап 2, 3</li><li>Связать тендеры, если этап - новая закупка</li></ul></article>
+      <article class="ptile"><span class="pn">08</span><h3>Итог</h3><ul><li>Выиграли: дата итога и данные договора</li><li>Завершено с причиной проигрыша или «Отказались сами»</li><li>Причина - в статистику</li></ul></article>
+      <div class="ploop"><span class="arr" aria-hidden="true">↺</span>Переторжка или новый этап - снова к шагу 04 «Подготовка» и подаче</div>
+  </div>
+</section>
+
+<!-- 5 шаг 1 -->
+<section class="slide divider" data-title="Шаг 1">
+  <div class="big">01</div>
+  <div class="eyebrow"><b>Шаг 1</b> · январь - сентябрь 2026</div>
+  <h2>Ручная автоматизация: Google-таблица и Telegram</h2>
+  <p class="lead">Собрали из готовых инструментов полуавтоматический цикл<br>Без разработки, на n8n, ИИ-моделях и Google-инструментах</p>
+</section>
+
+<!-- 7 граница автоматизации -->
+<section class="slide" data-title="Роли системы и команды">
+  <div class="eyebrow"><b>Шаг 1</b> · разделение работы</div>
+  <h2>Человек включается там, где нужно решение</h2>
+  <div class="handoff">
+    <article>
+      <span class="tag">Автоматически</span>
+      <strong>Повторяющаяся работа</strong>
+      <p>Сбор закупок, первичный отсев и предварительный разбор документов</p>
+    </article>
+    <article>
+      <span class="tag">Команда</span>
+      <strong>Решение и ответственность</strong>
+      <p>Проверка условий, решение об участии, подготовка документов и подача заявки</p>
+    </article>
+  </div>
+</section>
+
+<!-- 7 парсинг -->
+<section class="slide" data-title="Парсинг">
+  <div class="eyebrow"><b>Шаг 1</b> · парсинг закупок</div>
+  <div class="grid two">
+    <div class="grid" style="gap:18px">
+      <h2>Все тендеры в одной сводной таблице</h2>
+      <ul class="points">
+        <li><div><b>Каждый день в 04:00</b><span>n8n запускает выгрузку новых закупок</span></div></li>
+        <li><div><b>Одна строка = один тендер</b><span>название, заказчик, НМЦ, сроки, ссылка, отчёт ИИ</span></div></li>
+        <li><div><b>Решение и статус</b><span>менеджеры заполняют руками в той же таблице</span></div></li>
+      </ul>
+    </div>
+    <div class="shot"><video id="tableVideo" data-src="img/table-video-web-20261007.mp4" poster="img/table-video-poster.jpg" controls loop playsinline preload="none" aria-label="Видео: работа со сводной таблицей тендеров"></video></div>
+  </div>
+</section>
+
+<!-- 8 ИИ-фильтр -->
+<section class="slide" data-title="ИИ-фильтр">
+  <div class="eyebrow"><b>Шаг 1</b> · ИИ-фильтр и анализ</div>
+  <div class="analysis-layout">
+    <div class="analysis-copy">
+      <h2>ИИ отбирает и читает документацию за нас</h2>
+      <p class="lead">Первичный отбор по названию и описанию, затем документы: скачиваем, распознаём, ищем фрагменты и собираем отчёт из семи разделов и чек-лист документов</p>
+    </div>
+    <div class="analysis-slider" id="analysis-slider" aria-label="Скриншоты ИИ-фильтра" aria-roledescription="слайдер">
+      <div class="analysis-frames">
+        <figure class="active"><div class="shot"><img src="img/n8n-2.png" alt="Сценарий n8n"></div></figure>
+        <figure><div class="shot"><img src="img/n8n-1.png" alt="Сценарий n8n: обработка документов"></div></figure>
+        <figure><div class="shot"><img src="img/prompt.png" alt="Промпт для анализа закупки"></div></figure>
+      </div>
+      <div class="analysis-controls">
+        <button type="button" class="analysis-prev" aria-label="Предыдущий скриншот">‹</button>
+        <div class="analysis-dots" aria-label="Выбор скриншота"></div>
+        <button type="button" class="analysis-next" aria-label="Следующий скриншот">›</button>
+      </div>
+    </div>
+  </div>
+  <div class="analysis-results analysis-results-row" aria-label="Экономия времени по этапам">
+    <h3>Экономия времени</h3>
+    <div class="analysis-result"><strong>99%</strong><span>на поиск тендеров</span></div>
+    <div class="analysis-result"><strong>80%</strong><span>на анализ и решение</span></div>
+    <div class="analysis-result"><strong>50%</strong><span>на подготовку пакета документов</span></div>
+  </div>
+</section>
+
+<!-- 9 Telegram -->
+<section class="slide" data-title="Telegram">
+  <div class="eyebrow"><b>Шаг 1</b> · Telegram-интеграция</div>
+  <div class="grid two">
+    <div class="grid" style="gap:18px">
+      <h2>Тема в Telegram на каждый тендер</h2>
+      <p class="lead">У каждого направления своя группа. Меняем статус в таблице, и в нужной группе появляется тема с параметрами, ссылками и документами</p>
+    </div>
+    <div class="telegram-example">
+      <a class="shot" href="img/telegram-tender-example.png" target="_blank" rel="noopener" title="Открыть скриншот крупнее" aria-label="Открыть скриншот Telegram крупнее"><img src="img/telegram-tender-example.png" alt="Группа тендеров по разработке и тема закупки с параметрами, ссылками и документами"></a>
+    </div>
+  </div>
+</section>
+
+<!-- 10 база документов -->
+<section class="slide" data-title="База документов">
+  <div class="eyebrow"><b>Шаг 1</b> · база документов</div>
+  <div class="grid two">
+    <div class="grid" style="gap:18px">
+      <h2>Единая база документов</h2>
+      <p class="lead">Документы, опыт, сертификаты и квалификации собрали в одну таблицу со ссылками. Систематизировали под самые частые требования заказчиков</p>
+    </div>
+    <div class="shot"><video data-src="img/docs-base-demo-web-20261007.mp4" poster="img/docs-base.jpg" controls loop playsinline preload="none" aria-label="Видео: единая база документов"></video></div>
+  </div>
+</section>
+
+<!-- 11 цифры -->
+<section class="slide" data-title="Итоги 9 месяцев">
+  <div class="eyebrow"><b>Шаг 1</b> · результаты с 01.01 по 30.09.2026</div>
+  <h2>9 месяцев работы в цифрах</h2>
+  <div class="stats results-stats">
+    <div class="stat"><strong>2 568</strong><span>тендеров обработано</span><small>строк в таблице</small></div>
+    <div class="stat"><strong>777</strong><span>взяли на изучение</span><small>30% от обработанных</small></div>
+    <div class="stat"><strong>148</strong><span>подач</span><small>130 первично + 18 переторжек</small></div>
+    <div class="stat hi"><strong>4</strong><span>победы</span><small>май, июнь, июль</small></div>
+    <div class="stat"><strong>35 мин</strong><span>самая быстрая подача заявки</span></div>
+    <div class="stat"><strong>14</strong><span>площадок в справочнике</span></div>
+  </div>
+</section>
+
+<!-- 12 динамика -->
+<section class="slide data-dark" data-title="Динамика по месяцам">
+  <div class="eyebrow"><b>Шаг 1</b> · динамика</div>
+  <h2>Динамика по месяцам</h2>
+  <div class="chart">
+    <h3>Обработано, изучено, подано и добавлено вручную</h3>
+    <svg id="chMonthly" viewBox="0 0 1000 340" role="img" aria-label="Столбцы по месяцам: обработано, изучено, подано. Точки внутри столбцов обработанных показывают число тендеров, добавленных вручную"></svg>
+    <div class="legend"><span><i style="background:var(--wine-bright)"></i>Обработано</span><span><i style="background:var(--ice)"></i>Изучено</span><span><i style="background:var(--lime)"></i>Подано первично</span><span><i class="point-key"></i>Добавлено вручную</span></div>
+  </div>
+</section>
+
+<!-- 15 точность -->
+<section class="slide data-dark" data-title="Точность отбора">
+  <div class="eyebrow"><b>Шаг 1</b> · качество отбора</div>
+  <h2>С мая ИИ пропускает меньше «мусора»</h2>
+  <div class="chart">
+    <h3>Отказы с причиной «плохо определил ИИ»</h3>
+    <svg id="chAiErr" viewBox="0 0 1000 320" role="img" aria-label="Отказы из-за ошибки ИИ по месяцам"></svg>
+  </div>
+  <p class="lead">В январе–апреле таких отказов было 150–388 в месяц. С мая - от 3 до 26, в сентябре - 3</p>
+</section>
+
+<!-- 16 подготовка и подача -->
+<section class="slide data-dark" data-title="Подготовка и подача">
+  <div class="eyebrow"><b>Шаг 1</b> · от отбора к заявке</div>
+  <h2>От изучения к подготовке и подаче</h2>
+  <div class="grid cards-2" style="align-items:stretch">
+    <div class="chart"><h3>Доля тендеров, взятых на изучение, %</h3><svg id="chShare" viewBox="0 0 520 300" role="img" aria-label="По месяцам: доля изученных от обработанных и доля изученных от обработанных за вычетом отказов по причине ошибки ИИ"></svg>
+      <div class="legend"><span><i style="background:#ff2159"></i>Изучено / обработано</span><span><i style="background:#bdbdbd"></i>Изучено / (обработано − отказы по причине ИИ)</span></div></div>
+    <div class="chart"><h3>Взято на подготовку и подано, по месяцам</h3><svg id="chPrepSubmit" viewBox="0 0 520 300" role="img" aria-label="Две кривые по месяцам: взято на подготовку и подано первично"></svg>
+      <div class="legend"><span><i style="background:var(--ice)"></i>Взято на подготовку</span><span><i style="background:var(--lime)"></i>Подано</span></div></div>
+  </div>
+</section>
+
+<!-- 16 результат и ограничения шага 1 -->
+<section class="slide" data-title="Пределы шага 1">
+  <div class="eyebrow"><b>Шаг 1</b> · результат и ограничения</div>
+  <h2>Что работает и что мешает</h2>
+  <div class="limit-rows">
+    <div class="limit-head"><span>Работает</span><span>Мешает</span></div>
+    <div class="limit-row">
+      <div class="limit-card positive"><p>Все тендеры и статусы собраны в одной таблице</p></div>
+      <div class="limit-card negative"><p>Отчёт ИИ, обсуждение и файлы остаются в разных местах</p></div>
+    </div>
+    <div class="limit-row">
+      <div class="limit-card positive"><p>ИИ отбирает тендеры и разбирает документы</p></div>
+      <div class="limit-card negative"><p>В таблице нельзя разделить доступ, а задачи и сроки команда отслеживает вручную</p></div>
+    </div>
+    <div class="limit-row">
+      <div class="limit-card positive"><p>Подачи и итоги фиксируем в отдельном листе</p></div>
+      <div class="limit-card negative"><p>Итоги приходится сверять вручную со строками тендеров</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- 17 шаг 2 -->
+<section class="slide divider" data-title="Шаг 2">
+  <div class="big">02</div>
+  <div class="eyebrow"><b>Шаг 2</b> · переходим в код</div>
+  <h2>Тендерный сервис: весь цикл в одном окне</h2>
+  <p class="lead">Собственное веб-приложение Атвинты. Автоматизация n8n остаётся «двигателем», а сервис становится рабочим местом команды</p>
+</section>
+
+<!-- 18 одно окно -->
+<section class="slide" data-title="Одно окно">
+  <div class="eyebrow"><b>Шаг 2</b> · что меняется</div>
+  <h2>Пять мест работы - одно окно</h2>
+  <div class="work-map" role="img" aria-label="Google-таблица, Google-документы, Telegram, диски и лист статистики объединяются в Тендерном сервисе">
+    <div class="work-sources">
+      <div class="work-source">Google-таблица</div>
+      <div class="work-source">Google-документы</div>
+      <div class="work-source">Telegram</div>
+      <div class="work-source">Диски</div>
+      <div class="work-source">Лист «Статистика»</div>
+    </div>
+    <div class="work-arrow" aria-hidden="true">→</div>
+    <div class="work-window">
+      <strong>Тендерный сервис</strong>
+      <span>Всё, что нужно команде для работы с тендером</span>
+      <div class="work-window-tags"><i>Тендеры</i><i>Отчёты ИИ</i><i>Обсуждение</i><i>Документы</i><i>Сроки</i><i>Статистика</i></div>
+    </div>
+  </div>
+</section>
+
+<!-- 19 новые -->
+<section class="slide" data-title="Новые тендеры">
+  <div class="eyebrow"><b>Шаг 2</b> · отбор</div>
+  <div class="grid two">
+    <div class="grid" style="gap:18px">
+      <h2>Новый тендер приходит уже с отчётом ИИ</h2>
+      <ul class="points">
+        <li><div><b>Только «наше» и «не уверен»</b><span>«не наше» в сервис не попадает</span></div></li>
+        <li><div><b>Значок риска ⚠</b><span>если ИИ не уверен или нужен юрист</span></div></li>
+        <li><div><b>Два решения</b><span>отбор у админа, «участвуем» у ответственного</span></div></li>
+        <li><div><b>Отказ только с причиной</b><span>и «Отменить» 15 секунд на случай ошибки</span></div></li>
+      </ul>
+    </div>
+    <div class="shot"><video data-src="img/svc-new-tenders-demo-20261006-web-20261007.mp4" poster="img/svc-new-tenders-demo-20261006.jpg" controls loop playsinline preload="none" aria-label="Видео: обработка новых тендеров"></video></div>
+  </div>
+</section>
+
+<!-- 20 карточка -->
+<section class="slide" data-title="Карточка тендера">
+  <div class="eyebrow"><b>Шаг 2</b> · подготовка</div>
+  <div class="grid two">
+    <div class="grid" style="gap:18px">
+      <h2>Вся работа по тендеру в одной карточке</h2>
+      <ul class="points">
+        <li><div><b>Чек-лист и готовность %</b><span>пункты от ИИ и по кнопке, с исполнителем и сроком</span></div></li>
+        <li><div><b>Этапы</b><span>НДА, ПКО, основной, переторжка - в хронологии</span></div></li>
+        <li><div><b>Формы заказчика</b><span>заполняем прямо в сервисе, реквизиты подставляются сами</span></div></li>
+        <li><div><b>Задачи, чат, журнал</b><span>вместо тем в Telegram</span></div></li>
+      </ul>
+    </div>
+    <div class="shot"><video data-src="img/svc-tender-card-v2-web-20261007.mp4" poster="img/svc-tender-card-v2-web-20261007.jpg" controls loop playsinline preload="none" aria-label="Видео: работа с карточкой тендера"></video></div>
+  </div>
+</section>
+
+<!-- 21 после подачи -->
+<section class="slide" data-title="После подачи">
+  <div class="eyebrow"><b>Шаг 2</b> · отслеживание результатов</div>
+  <h2>После подачи следим за тендером до итога</h2>
+  <div class="shots">
+    <div><div class="shot"><img src="img/svc-pochta.jpg" alt="Раздел «Почта»"></div><p class="cap">«Почта»: письма площадок сами привязываются к тендеру - переторжка, протокол, изменение сроков</p></div>
+    <div><div class="shot"><img src="img/svc-zayavki.jpg" alt="Раздел «Заявки»"></div><p class="cap">«Заявки»: дата подачи, ожидаемый ответ и статус по каждой</p></div>
+  </div>
+  <p class="lead">Допустили к следующему этапу - добавляем этап в той же карточке. Если заказчик объявил его новой закупкой, связываем тендеры, и история не теряется</p>
+</section>
+
+<!-- 22 копилка и сроки -->
+<section class="slide" data-title="Копилка и сроки">
+  <div class="eyebrow"><b>Шаг 2</b> · документы и дедлайны</div>
+  <div class="grid two">
+    <div class="shot"><img src="img/svc-kopilka.jpg" alt="Копилка документов"></div>
+    <div class="grid" style="gap:18px">
+      <h2>Документы под рукой, дедлайны под контролем</h2>
+      <ul class="points">
+        <li><div><b>Копилка</b><span>учредительные, опыт, штат, шаблоны; один файл в разных тендерах без копий</span></div></li>
+        <li><div><b>Подсветка срока</b><span>жёлтый за 2 дня, розовый в день подачи, плюс уведомление</span></div></li>
+        <li><div><b>Меньше суток до подачи</b><span>карточка выделяется целиком</span></div></li>
+        <li><div><b>Просроченные задачи</b><span>видны первыми, исполнителю и ответственному приходит уведомление</span></div></li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- 23 дашборд -->
+<section class="slide" data-title="Дашборд">
+  <div class="eyebrow"><b>Шаг 2</b> · статистика</div>
+  <div class="grid two">
+    <div class="grid" style="gap:18px">
+      <h2>Статистика больше не считается вручную</h2>
+      <ul class="points">
+        <li><div><b>Любой период</b><span>с начала года, месяца или свои даты</span></div></li>
+        <li><div><b>Подачи по дате подачи</b><span>первично и переторжки отдельно</span></div></li>
+        <li><div><b>Победы и суммы договоров</b><span>по направлениям</span></div></li>
+        <li><div><b>Причины отказов</b><span>видно, где теряем тендеры</span></div></li>
+      </ul>
+    </div>
+    <div class="shot"><img src="img/svc-dashboard.jpg" alt="Дашборд сервиса"></div>
+  </div>
+</section>
+
+<!-- 25 финал после удаления слайда о плане разработки -->
+<section class="slide cover" data-title="Вопросы">
+  <img class="logo" src="img/logo.png" alt="Атвинта">
+  <h1>Спасибо! <em>Вопросы?</em></h1>
+  <p class="lead">Шаг 1 дал поток и 4 победы за 9 месяцев. Шаг 2 даёт процесс: каждый тендер, решение и подача остаются в одном месте и сами попадают в статистику</p>
+</section>
+
+
+<section class="slide qr-final" data-title="Практикум в подарок">
+  <div class="qr-layout">
+    <div class="qr-copy">
+      <div class="eyebrow"><b>Подарок участникам</b> · заберите с собой</div>
+      <h2>Практикум<br>для работы<br><em>с тендерами</em></h2>
+      <p class="lead">Разбор документации с ИИ, замер результата и выбор первой задачи для автоматизации</p>
+    </div>
+    <div class="qr-panel">
+      <a class="qr-code" href="https://event-tender-kit.vercel.app/" target="_blank" rel="noopener noreferrer" aria-label="Открыть тендерный практикум">
+        <img src="data:image/png;base64,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JECAAAECBAgQINAhoDB0qNuTAAECBAgQIECAwJcIKAxfEpQxCRAgQIAAAQIECHQIKAwd6vYkQIAAAQIECBAg8CUCCsOXBGVMAgQIECBAgAABAh0CCkOHuj0JECBAgAABAgQIfImAwvAlQRmTAAECBAgQIECAQIeAwtChbk8CBAgQIECAAAECXyLw8yVzGnOowHVd0Se777t0vvTzlh72CxaT715I1fe5Oo+9073/62q/6olPm6/6/lWvV52v9Qg8EfAbhida3iVAgAABAgQIECBwmIDCcFjgjkuAAAECBAgQIEDgiYDC8ETLuwQIECBAgAABAgQOE1AYDgvccQkQIECAAAECBAg8EVAYnmh5lwABAgQIECBAgMBhAgrDYYE7LgECBAgQIECAAIEnAgrDEy3vEiBAgAABAgQIEDhMQGE4LHDHJUCAAAECBAgQIPBEQGF4ouVdAgQIECBAgAABAocJKAyHBe64BAgQIECAAAECBJ4IKAxPtLxLgAABAgQIECBA4DABheGwwB2XAAECBAgQIECAwBMBheGJlncJECBAgAABAgQIHCagMBwWuOMSIECAAAECBAgQeCKgMDzR8i4BAgQIECBAgACBwwQUhsMCd1wCBAgQIECAAAECTwQUhida3iVAgAABAgQIECBwmIDCcFjgjkuAAAECBAgQIEDgiYDC8ETLuwQIECBAgAABAgQOE7ju3/8OO3P0ca/rKp3vtHj57V2far+9aV6/dp9fTfxkLXDafVlLZDxJ//clQ8kUfwL+/v5JZPzpNwwZOZiCAAECBAgQIECAQKSAwhAZi6EIECBAgAABAgQIZAgoDBk5mIIAAQIECBAgQIBApIDCEBmLoQgQIECAAAECBAhkCCgMGTmYggABAgQIECBAgECkgMIQGYuhCBAgQIAAAQIECGQIKAwZOZiCAAECBAgQIECAQKSAwhAZi6EIECBAgAABAgQIZAgoDBk5mIIAAQIECBAgQIBApIDCEBmLoQgQIECAAAECBAhkCCgMGTmYggABAgQIECBAgECkgMIQGYuhCBAgQIAAAQIECGQIKAwZOZiCAAECBAgQIECAQKSAwhAZi6EIECBAgAABAgQIZAgoDBk5mIIAAQIECBAgQIBApIDCEBmLoQgQIECAAAECBAhkCCgMGTmYggABAgQIECBAgECkgMIQGYuhCBAgQIAAAQIE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" width="780" height="780" alt="QR-код: https://event-tender-kit.vercel.app/">
+      </a>
+      <a class="qr-url" href="https://event-tender-kit.vercel.app/" target="_blank" rel="noopener noreferrer">event-tender-kit.vercel.app ↗</a>
+      <p class="qr-caption">Сканируйте QR-код или откройте ссылку</p>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<button type="button" class="to-top" id="toTop" aria-label="Вернуться к первому слайду" hidden><span aria-hidden="true">↑</span></button>
+
+<nav class="nav" aria-label="Листание">
+  <button type="button" id="prev" aria-label="Предыдущий экран">↑</button>
+  <output id="counter" aria-live="polite">1 / 25</output>
+  <button type="button" id="next" aria-label="Следующий экран">↓</button>
+</nav>
+
+<script>
+document.documentElement.classList.add('js');
+(function(){
+  // Лист «статистика» таблицы «Тендеры», строки «Итого» за январь–сентябрь 2026.
+  // prepared - «готовить заявок», sub - первичные подачи без повторных этапов.
+  var M=['янв','фев','мар','апр','май','июн','июл','авг','сен'];
+  var rows=[332,598,391,390,146,163,176,183,189];
+  // Непустая колонка A листа «Тендеры»; месяц по «Дата создания строки» (колонка W).
+  var manual=[19,28,21,16,11,4,8,11,7];
+  var studied=[61,97,115,111,69,69,77,92,86];
+  var prepared=[11,21,27,25,13,7,18,18,20];
+  var sub=[9,17,12,25,8,7,15,21,16];
+  var aiErr=[150,388,182,155,9,26,9,8,3];
+  var C={wine:'#a4a4a4',ice:'#26c9b8',lime:'#ff2159',muted:'#787878',text:'#222222',grid:'#d9d9d9'};
+  var NS='http://www.w3.org/2000/svg';
+  function el(svg,tag,attrs,text){var e=document.createElementNS(NS,tag);for(var k in attrs)e.setAttribute(k,attrs[k]);if(text!=null)e.textContent=text;svg.appendChild(e);return e;}
+  function fmt(n){return String(n).replace(/\B(?=(\d{3})+(?!\d))/g,' ');}
+  function niceMax(v){var steps=[1,2,5];var p=Math.pow(10,Math.floor(Math.log10(v)));for(var i=0;i<12;i++){var s=steps[i%3]*p*Math.pow(10,Math.floor(i/3));if(s*4>=v)return s*4;}return v;}
+  function axes(svg,W,H,pad,max,labels){
+    for(var i=0;i<=4;i++){var y=pad.t+(H-pad.t-pad.b)*(1-i/4);el(svg,'line',{x1:pad.l,x2:W-pad.r,y1:y,y2:y,stroke:C.grid,'stroke-width':1});}
+    var bw=(W-pad.l-pad.r)/labels.length;
+    labels.forEach(function(l,i){el(svg,'text',{x:pad.l+bw*(i+.5),y:H-pad.b+20,'text-anchor':'middle','font-size':13,fill:C.muted},l);});
+    return bw;
+  }
+  function bars(id,series,colors,labels){
+    var svg=document.getElementById(id);if(!svg)return;var vb=svg.viewBox.baseVal,W=vb.width,H=vb.height,pad={t:24,r:8,b:30,l:8};
+    var max=niceMax(Math.max.apply(null,series.flat()));var bw=axes(svg,W,H,pad,max,labels);var n=series.length,gw=bw*.78,w=gw/n;
+    series.forEach(function(s,si){s.forEach(function(v,i){var h=(H-pad.t-pad.b)*v/max,x=pad.l+bw*i+(bw-gw)/2+w*si,y=H-pad.b-h;
+      el(svg,'rect',{x:x+1,y:y,width:Math.max(w-2,2),height:Math.max(h,1),rx:3,fill:colors[si]});
+      el(svg,'text',{x:x+w/2,y:y-6,'text-anchor':'middle','font-size':labels.length>6&&n>2?11:13,fill:C.text,'font-weight':600},fmt(v));});});
+  }
+  function manualPoints(id,values,labels){
+    var svg=document.getElementById(id);if(!svg)return;
+    var vb=svg.viewBox.baseVal,W=vb.width,H=vb.height,pad={t:24,r:8,b:30,l:8};
+    var bw=(W-pad.l-pad.r)/labels.length,gw=bw*.78,barW=gw/3,base=H-pad.b;
+    var points=values.map(function(v,i){
+      var x=pad.l+bw*i+(bw-gw)/2+barW/2;
+      var y=base-8-v/30*36;
+      return [x,y];
+    });
+    points.forEach(function(p,i){
+      el(svg,'circle',{cx:p[0],cy:p[1],r:5,fill:'#f0ff40'});
+      el(svg,'text',{x:p[0],y:p[1]-13,'text-anchor':'middle','font-size':13,fill:'#f0ff40','font-weight':700},String(values[i]));
+    });
+  }
+  function lines(id,series,colors,labels,suffix){
+    var svg=document.getElementById(id);if(!svg)return;var vb=svg.viewBox.baseVal,W=vb.width,H=vb.height,pad={t:26,r:14,b:30,l:14};
+    var max=niceMax(Math.max.apply(null,series.flat()));var bw=axes(svg,W,H,pad,max,labels);
+    series.forEach(function(s,si){var pts=s.map(function(v,i){return [pad.l+bw*(i+.5),pad.t+(H-pad.t-pad.b)*(1-v/max)];});
+      if(colors[si]===C.ice)el(svg,'polyline',{points:pts.map(function(p){return p.join(',');}).join(' '),fill:'none',stroke:'#0d5b55','stroke-width':6,'stroke-linejoin':'round'});
+      el(svg,'polyline',{points:pts.map(function(p){return p.join(',');}).join(' '),fill:'none',stroke:colors[si],'stroke-width':3,'stroke-linejoin':'round'});
+      pts.forEach(function(p,i){el(svg,'circle',{cx:p[0],cy:p[1],r:i===pts.length-1?5:3.5,fill:colors[si]});
+        if(i===0||i===pts.length-1||s.length<=9&&series.length===1)el(svg,'text',{x:p[0],y:p[1]-10,'text-anchor':'middle','font-size':12,fill:C.text,'font-weight':600},fmt(s[i])+(suffix||''));});});
+  }
+  function shareLines(id,labels,studiedShare,submittedShare){
+    var svg=document.getElementById(id);if(!svg)return;
+    var W=520,H=300,pad={t:22,r:14,b:34,l:38},max=60,series=[studiedShare,submittedShare],colors=[C.lime,'#bdbdbd'];
+    for(var tick=0;tick<=max;tick+=20){var y=pad.t+(H-pad.t-pad.b)*(1-tick/max);
+      el(svg,'line',{x1:pad.l,x2:W-pad.r,y1:y,y2:y,stroke:tick===0?'#8a8a8a':'#4a4a4a','stroke-width':tick===0?2:1});
+      el(svg,'text',{x:pad.l-9,y:y+4,'text-anchor':'end','font-size':12,fill:'#bdbdbd'},tick+'%');}
+    labels.forEach(function(label,i){var x=pad.l+(W-pad.l-pad.r)*i/(labels.length-1);
+      el(svg,'text',{x:x,y:H-7,'text-anchor':'middle','font-size':12,fill:'#bdbdbd'},label);});
+    series.forEach(function(values,si){var points=values.map(function(v,i){return [pad.l+(W-pad.l-pad.r)*i/(values.length-1),pad.t+(H-pad.t-pad.b)*(1-v/max)];});
+      el(svg,'polyline',{points:points.map(function(p){return p.join(',');}).join(' '),fill:'none',stroke:colors[si],'stroke-width':3,'stroke-linecap':'round','stroke-linejoin':'round'});
+      points.forEach(function(p,i){el(svg,'circle',{cx:p[0],cy:p[1],r:4,fill:colors[si]});
+        el(svg,'text',{x:p[0],y:p[1]+(si===0?19:-11),'text-anchor':'middle','font-size':12,fill:colors[si],'font-weight':700},values[i]+'%');});});
+  }
+  function twoLinesWithValues(id,series,colors,labels){
+    var svg=document.getElementById(id);if(!svg)return;var vb=svg.viewBox.baseVal,W=vb.width,H=vb.height,pad={t:24,r:12,b:32,l:50},max=30;
+    for(var tick=0;tick<=30;tick+=10){var y=pad.t+(H-pad.t-pad.b)*(1-tick/max);
+      el(svg,'line',{x1:pad.l,x2:W-pad.r,y1:y,y2:y,stroke:tick===0?C.muted:C.grid,'stroke-width':tick===0?2:1});
+      el(svg,'text',{x:pad.l-12,y:y+4,'text-anchor':'end','font-size':13,fill:C.muted},String(tick));}
+    labels.forEach(function(label,i){var x=pad.l+(W-pad.l-pad.r)*i/(labels.length-1);
+      el(svg,'text',{x:x,y:H-7,'text-anchor':'middle','font-size':13,fill:C.muted},label);});
+    series.forEach(function(values,si){var other=series[1-si];var points=values.map(function(v,i){return [pad.l+(W-pad.l-pad.r)*i/(values.length-1),pad.t+(H-pad.t-pad.b)*(1-v/max)];});
+      if(colors[si]===C.ice)el(svg,'polyline',{points:points.map(function(p){return p.join(',');}).join(' '),fill:'none',stroke:'#0d5b55','stroke-width':6,'stroke-linecap':'round','stroke-linejoin':'round'});
+      el(svg,'polyline',{points:points.map(function(p){return p.join(',');}).join(' '),fill:'none',stroke:colors[si],'stroke-width':3,'stroke-linecap':'round','stroke-linejoin':'round'});
+      points.forEach(function(p,i){var above=values[i]>other[i]||(values[i]===other[i]&&si===0);
+        el(svg,'circle',{cx:p[0],cy:p[1],r:4,fill:colors[si]});
+        el(svg,'text',{x:p[0],y:p[1]+(above?-12:20),'text-anchor':'middle','font-size':13,fill:colors[si],'font-weight':700},String(values[i]));});});
+  }
+  function hbars(id,data,lab,hi,suf){lab=lab||200;suf=suf||'';
+    var svg=document.getElementById(id);if(!svg)return;var vb=svg.viewBox.baseVal,W=vb.width,H=vb.height,rowH=H/data.length,max=data[0][1];
+    data.forEach(function(d,i){var y=i*rowH+rowH*.2,h=rowH*.6,w=(W-lab-70)*d[1]/max;
+      el(svg,'text',{x:lab-10,y:y+h/2+5,'text-anchor':'end','font-size':14,fill:C.text},d[0]);
+      el(svg,'rect',{x:lab,y:y,width:Math.max(w,2),height:h,rx:4,fill:d[0]===hi?C.lime:C.wine});
+      el(svg,'text',{x:lab+Math.max(w,2)+8,y:y+h/2+5,'font-size':14,fill:C.text,'font-weight':600},fmt(d[1])+suf);});
+  }
+  function donut(id,legId,data){
+    var svg=document.getElementById(id),leg=document.getElementById(legId);if(!svg)return;
+    var tot=data.reduce(function(a,d){return a+d[1];},0),cx=120,cy=120,R=110,r=66,a0=-Math.PI/2;
+    data.forEach(function(d){var a1=a0+2*Math.PI*d[1]/tot,large=a1-a0>Math.PI?1:0;
+      function pt(rad,a){return [cx+rad*Math.cos(a),cy+rad*Math.sin(a)];}
+      var p1=pt(R,a0),p2=pt(R,a1),p3=pt(r,a1),p4=pt(r,a0);
+      el(svg,'path',{d:'M'+p1+' A'+R+','+R+' 0 '+large+' 1 '+p2+' L'+p3+' A'+r+','+r+' 0 '+large+' 0 '+p4+' Z',fill:d[2],stroke:'#ffffff','stroke-width':2});
+      a0=a1;
+      var li=document.createElement('li');li.innerHTML='<i style="background:'+d[2]+'"></i><span></span><b>'+Math.round(d[1]/tot*100)+'%</b>';li.querySelector('span').textContent=d[0];leg.appendChild(li);});
+    el(svg,'text',{x:cx,y:cy-2,'text-anchor':'middle','font-size':30,'font-weight':600,fill:C.lime},Math.round(data[0][1]/tot*100)+'%');
+    el(svg,'text',{x:cx,y:cy+20,'text-anchor':'middle','font-size':11,fill:C.muted},'поиск тендеров');
+  }
+  bars('chMonthly',[rows,studied,sub],[C.wine,C.ice,C.lime],M);
+  manualPoints('chMonthly',manual,M);
+  twoLinesWithValues('chPrepSubmit',[prepared,sub],[C.ice,C.lime],M);
+  shareLines('chShare',M,
+    rows.map(function(r,i){return Math.round(studied[i]/r*100);}),
+    rows.map(function(r,i){return Math.round(studied[i]/(r-aiErr[i])*100);}));
+  bars('chAiErr',[aiErr],[C.lime],M);
+  // Анкета «ИИ в тендерах», 06.10.2026: 15 уникальных ответов, множественный выбор.
+  var surveyTotal=15;
+  var surveyTools=[['Тендерные агрегаторы',12],['Ручной поиск на площадках',9],['ИИ-чаты',8],['Excel / Google Таблицы',5],['CRM / задачник',3],['Свой ИИ-бот / агент',1],['Пока ничего',1]];
+  hbars('chTools',surveyTools.map(function(d){return [d[0],Math.round(d[1]/surveyTotal*100)];}),230,'ИИ-чаты','%');
+  donut('chPains','chPainsLeg',[['Найти подходящие тендеры',7,'#ff2159'],['Разобрать ТЗ и условия',6,'#f0ff40'],['Принять решение об участии',6,'#7755b4'],['Собрать документы и КП',6,'#148a86'],['Подобрать кейсы и опыт',3,'#f26455'],['Убрать дубли и лишние лоты',1,'#a4a4a4'],['Проверить всё перед подачей',1,'#d9d9d9']]);
+
+  // ---------- навигация ----------
+  // слайдер цитат: по одной, смена каждые 5 секунд, пауза при наведении
+  (function(){var root=document.getElementById('qslider');if(!root)return;
+    var qs=[].slice.call(root.querySelectorAll('blockquote')),dots=root.querySelector('.qdots'),i=0,timer=null;
+    qs.forEach(function(q,k){var b=document.createElement('button');b.type='button';b.setAttribute('aria-label','Цитата '+(k+1));b.addEventListener('click',function(){show(k);restart();});dots.appendChild(b);});
+    function show(k){i=k;qs.forEach(function(q,n){q.classList.toggle('active',n===k);});[].forEach.call(dots.children,function(b,n){b.setAttribute('aria-current',n===k?'true':'false');});}
+    function restart(){clearInterval(timer);timer=setInterval(function(){show((i+1)%qs.length);},5000);}
+    root.addEventListener('mouseenter',function(){clearInterval(timer);});root.addEventListener('mouseleave',restart);
+    show(0);restart();})();
+  (function(){var root=document.getElementById('analysis-slider');if(!root)return;
+    var frames=[].slice.call(root.querySelectorAll('.analysis-frames figure'));
+    var dots=root.querySelector('.analysis-dots'),index=0,timer=null;
+    var reduced=window.matchMedia('(prefers-reduced-motion: reduce)');
+    frames.forEach(function(_,i){var b=document.createElement('button');b.type='button';b.setAttribute('aria-label','Скриншот '+(i+1));b.addEventListener('click',function(){show(i);restart();});dots.appendChild(b);});
+    function show(i){index=(i+frames.length)%frames.length;frames.forEach(function(f,n){f.classList.toggle('active',n===index);});[].forEach.call(dots.children,function(b,n){b.setAttribute('aria-current',n===index?'true':'false');});}
+    function stop(){clearInterval(timer);timer=null;}
+    function start(){if(!timer&&!reduced.matches&&!document.hidden)timer=setInterval(function(){show(index+1);},5000);}
+    function restart(){stop();if(!root.matches(':hover')&&!root.contains(document.activeElement))start();}
+    root.querySelector('.analysis-prev').addEventListener('click',function(){show(index-1);restart();});
+    root.querySelector('.analysis-next').addEventListener('click',function(){show(index+1);restart();});
+    root.addEventListener('mouseenter',stop);root.addEventListener('mouseleave',start);
+    root.addEventListener('focusin',stop);root.addEventListener('focusout',function(e){if(!root.contains(e.relatedTarget))start();});
+    document.addEventListener('visibilitychange',function(){if(document.hidden)stop();else start();});
+    reduced.addEventListener('change',function(){if(reduced.matches)stop();else start();});
+    show(0);start();})();
+  // видео: запуск и пауза по клику
+  [].forEach.call(document.querySelectorAll('.vbox'),function(box){var v=box.querySelector('video');
+    box.addEventListener('click',function(){if(v.paused){var pr=v.play();if(pr&&pr.catch)pr.catch(function(){});}else v.pause();});
+    v.addEventListener('play',function(){box.classList.add('playing');});
+    v.addEventListener('pause',function(){box.classList.remove('playing');});
+  });
+  // остановки листания: начало каждого экрана и второй шаг у экранов «в два шага»
+  var slides=[].slice.call(document.querySelectorAll('.slide')),counter=document.getElementById('counter'),toTop=document.getElementById('toTop');
+  var stops=[].slice.call(document.querySelectorAll('.slide,.snap2')).filter(function(e){return e.offsetParent!==null||e.classList.contains('slide');});
+  var stepped=[].slice.call(document.querySelectorAll('.stepped'));
+  function current(){var best=0;stops.forEach(function(s,i){if(s.getBoundingClientRect().top<=window.innerHeight*0.35)best=i;});return best;}
+  function go(i){i=Math.max(0,Math.min(stops.length-1,i));stops[i].scrollIntoView({block:'start'});}
+  // Load a video only when its slide is current. Playback remains manual.
+  var activeVideoSlide=-1;
+  function prepareVideoSlide(index){
+    if(index===activeVideoSlide)return;
+    activeVideoSlide=index;
+    slides.forEach(function(slide,i){
+      [].forEach.call(slide.querySelectorAll('video'),function(video){
+        if(i===index){
+          video.preload='auto';
+          if(!video.getAttribute('src')){
+            video.src=video.getAttribute('data-src');
+            video.load();
+          }
+        }else{
+          video.pause();
+          video.preload=video.getAttribute('src')?'metadata':'none';
+        }
+      });
+    });
+  }
+  document.addEventListener('visibilitychange',function(){
+    if(document.hidden)[].forEach.call(document.querySelectorAll('video'),function(video){video.pause();});
+  });
+  function update(){
+    var mid=window.innerHeight/2,n=0;slides.forEach(function(s,i){if(s.getBoundingClientRect().top<=mid)n=i;});
+    prepareVideoSlide(n);
+    counter.textContent=(n+1)+' / '+slides.length;
+    toTop.hidden=n===0;
+    stepped.forEach(function(s){
+      var n=s.querySelectorAll('.snap2').length+1,k=Math.max(0,Math.min(n-1,Math.floor((-s.getBoundingClientRect().top+window.innerHeight*0.5)/window.innerHeight)));
+      s.classList.toggle('on',k>=1);
+      [].forEach.call(s.querySelectorAll('[data-i]'),function(e){e.classList.toggle('active',+e.getAttribute('data-i')===k);});
+    });
+  }
+  window.addEventListener('scroll',update,{passive:true});window.addEventListener('resize',update);update();
+  toTop.addEventListener('click',function(){go(0);});
+  document.getElementById('prev').addEventListener('click',function(){go(current()-1);});
+  document.getElementById('next').addEventListener('click',function(){go(current()+1);});
+  document.addEventListener('keydown',function(e){
+    if(e.target.closest&&(e.target.closest('.process')||e.target.closest('video')))return;
+    if(['ArrowDown','PageDown',' '].indexOf(e.key)>-1){e.preventDefault();go(current()+1);}
+    else if(['ArrowUp','PageUp'].indexOf(e.key)>-1){e.preventDefault();go(current()-1);}
+    else if(e.key==='Home'){e.preventDefault();go(0);}else if(e.key==='End'){e.preventDefault();go(stops.length-1);}
+  });
+})();
+</script>
